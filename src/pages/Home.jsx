@@ -4,15 +4,20 @@ export default function Home() {
   return (
     <div style={{ fontFamily: "Arial, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 60px", background: "white" }}>
-        <h2 style={{ margin: 0, color: "#0f172a" }}>AuthTrack Pro</h2>
-        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/register" style={{ background: "#2563eb", color: "white", padding: "12px 18px", borderRadius: "8px", textDecoration: "none" }}>
-            Request Demo
-          </Link>
-        </div>
-      </nav>
+  <h2 style={{ margin: 0, color: "#0f172a" }}>AuthTrack Pro</h2>
+
+  <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+    <a href="#product">Product</a>
+    <a href="#solutions">Solutions</a>
+    <Link to="/pricing">Pricing</Link>
+    <a href="#demo">Demo</a>
+    <a href="#support">Support</a>
+    <Link to="/login">Login</Link>
+    <Link to="/register" style={{ background: "#2563eb", color: "white", padding: "12px 18px", borderRadius: "8px", textDecoration: "none" }}>
+      Request Demo
+    </Link>
+  </div>
+</nav>
 
       <section style={{ padding: "90px 60px", maxWidth: "1100px", margin: "0 auto" }}>
         <p style={{ color: "#2563eb", fontWeight: "700", letterSpacing: "2px" }}>
