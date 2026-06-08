@@ -24,9 +24,9 @@ export default function Register() {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    email,
-    password,
-  }),
+  email: form.email,
+  password: form.password,
+}),
 });
 
       const data = await response.json();
