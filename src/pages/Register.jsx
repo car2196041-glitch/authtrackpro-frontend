@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-const API_BASE = "http://localhost:3000";
-
+const API_BASE = "https://authtrackpro-backend.onrender.com";
 export default function Register() {
   const [form, setForm] = useState({
     email: "",
