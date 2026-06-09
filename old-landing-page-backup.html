@@ -1,26 +1,26 @@
-import { useEffect } from "react";
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>authtrackpro-frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 
-export default function Home() {
-  useEffect(() => {
-    const handleClick = (e) => {
-      const link = e.target.closest("a[href^='#']");
-      if (!link) return;
-
-      const id = link.getAttribute("href").replace("#", "");
-      const section = document.getElementById(id);
-
-      if (section) {
-        e.preventDefault();
-        section.scrollIntoView({ behavior: "smooth" });
-      }
-    };
-
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  }, []);
-
-  return (
-    <div dangerouslySetInnerHTML={{ __html: `<header class="site-header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuthTrack Pro | Prior Authorization Workflow Platform</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
     <nav class="navbar container">
     <a href="#home" class="brand">
   <img src="logo.jpg" class="logo-img large-logo">
@@ -232,6 +232,9 @@ export default function Home() {
       <div><h4>Pages</h4><a href="#product">Product</a><a href="#solutions">Solutions</a><a href="#pricing">Pricing</a><a href="#demo">Demo</a></div>
       <div><h4>Legal</h4><p>This demo does not store PHI. Production use requires HIPAA safeguards, BAAs, encryption, access controls, and audit logging.</p></div>
     </div>
-  </footer>` }} />
-  );
-}
+  </footer>
+  
+</body>
+
+</html>
+
