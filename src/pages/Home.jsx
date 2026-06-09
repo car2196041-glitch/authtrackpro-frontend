@@ -1,4 +1,4 @@
-cat > src/pages/Home.jsx <<'EOF'
+ 
 import { Link } from "react-router-dom";
 
 export default function Home() {
@@ -129,4 +129,3 @@ const styles = {
   text: { fontSize: "18px", color: "#475569", lineHeight: 1.6 },
   footer: { background: "#0f172a", color: "white", padding: "36px 60px", marginTop: "40px" },
 };
-EOF
