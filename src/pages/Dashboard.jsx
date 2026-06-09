@@ -1,4 +1,4 @@
-cat > src/pages/Dashboard.jsx <<'EOF'
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -463,4 +463,3 @@ const styles = {
   saveBtn: { background: "#16a34a", color: "white", border: 0, borderRadius: "10px", padding: "8px 10px", marginRight: "6px" },
   cancelBtn: { background: "#64748b", color: "white", border: 0, borderRadius: "10px", padding: "8px 10px" },
 };
-EOF
