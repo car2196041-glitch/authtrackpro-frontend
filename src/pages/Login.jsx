@@ -12,7 +12,9 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("https://authtrackpro-backend.onrender.com", {
+      const response = await fetch(
+  "https://authtrackpro-backend.onrender.com/auth/login",
+  {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
