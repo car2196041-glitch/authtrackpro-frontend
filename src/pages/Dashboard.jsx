@@ -1,33 +1,80 @@
-import { useEffect, useState } from "react";
+cat > src/pages/Dashboard.jsx <<'EOF'
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = "https://authtrackpro-backend.onrender.com";
-const token = localStorage.getItem("token");
 
-function Dashboard() {
-  const [metrics, setMetrics] = useState({
-    total: 0,
-    pending: 0,
-    approved: 0,
-    denied: 0,
+const emptyForm = {
+  patient_name: "",
+  payer: "",
+  procedure_name: "",
+  cpt_code: "",
+  status: "Pending",
+  priority: "Normal",
+  due_date: "",
+  assigned_to: "",
+  notes: "",
+};
+
+const statusOptions = [
+  "Pending",
+  "Approved",
+  "Denied",
+  "Awaiting Clinical",
+  "Missing Docs",
+  "Renewal Needed",
+  "Not Started",
+];
+
+const priorityOptions = ["Normal", "High", "Urgent"];
+
+function getToken() {
+  return localStorage.getItem("authtrack_token") || localStorage.getItem("token");
+}
+
+function formatDate(value) {
+  return value ? value.slice(0, 10) : "";
+}
+
+function escapeCsv(value) {
+  const str = String(value ?? "");
+  return `"${str.replaceAll('"', '""')}"`;
+}
+
+function parseCsv(text) {
+  const rows = text.trim().split(/\r?\n/);
+  const headers = rows.shift().split(",").map((h) => h.trim().toLowerCase());
+
+  return rows.map((row) => {
+    const values = row.split(",").map((v) => v.replace(/^"|"$/g, "").trim());
+    const record = {};
+    headers.forEach((header, i) => {
+      record[header] = values[i] || "";
+    });
+    return {
+      patient_name: record.patient_name || record.patient || "",
+      payer: record.payer || "",
+      procedure_name: record.procedure_name || record.procedure || "",
+      cpt_code: record.cpt_code || record.cpt || "",
+      status: record.status || "Pending",
+      priority: record.priority || "Normal",
+      due_date: record.due_date || "",
+      assigned_to: record.assigned_to || "",
+      notes: record.notes || "",
+    };
   });
+}
 
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const fileRef = useRef(null);
+
+  const [metrics, setMetrics] = useState({ total: 0, pending: 0, approved: 0, denied: 0 });
   const [authorizations, setAuthorizations] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [formData, setFormData] = useState({
-    patient_name: "",
-    payer: "",
-    procedure_name: "",
-    cpt_code: "",
-    status: "Pending",
-    priority: "Normal",
-    due_date: "",
-    assigned_to: "",
-    notes: "",
-  });
-
+  const [formData, setFormData] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
@@ -35,101 +82,63 @@ function Dashboard() {
   }, []);
 
   async function fetchDashboardData() {
-  try {
-    const token =
-      localStorage.getItem("authtrack_token") ||
-      localStorage.getItem("token");
-
-    const response = await fetch(`${API_BASE}/dashboard`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    console.log("DASHBOARD RESPONSE:", data);
-
-    setMetrics({
-      total: data.total || 0,
-      pending: data.pending || 0,
-      approved: data.approved || 0,
-      denied: data.denied || 0,
-    });
-  } catch (error) {
-    console.error("Dashboard fetch error:", error);
+    try {
+      const response = await fetch(`${API_BASE}/dashboard`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await response.json();
+      setMetrics({
+        total: data.total || 0,
+        pending: data.pending || 0,
+        approved: data.approved || 0,
+        denied: data.denied || 0,
+      });
+    } catch (error) {
+      console.error("Dashboard fetch error:", error);
+    }
   }
-}
 
   async function fetchAuthorizations() {
-  try {
-    const token =
-      localStorage.getItem("authtrack_token") ||
-      localStorage.getItem("token");
-
-    const response = await fetch(`${API_BASE}/authorizations`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    console.log("AUTH RESPONSE:", data);
-
-    setAuthorizations(Array.isArray(data) ? data : []);
-  } catch (error) {
-    console.error("Authorization fetch error:", error);
-    setAuthorizations([]);
-  } finally {
-    setLoading(false);
+    try {
+      const response = await fetch(`${API_BASE}/authorizations`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await response.json();
+      setAuthorizations(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Authorization fetch error:", error);
+      setAuthorizations([]);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+
+  function handleEditChange(e) {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const token =
-      localStorage.getItem("authtrack_token") ||
-      localStorage.getItem("token");
-
     try {
       const response = await fetch(`${API_BASE}/authorizations`, {
         method: "POST",
         headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
-},
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save authorization");
-      }
+      if (!response.ok) throw new Error("Failed to save authorization");
 
-      setFormData({
-        patient_name: "",
-        payer: "",
-        procedure_name: "",
-        cpt_code: "",
-        status: "Pending",
-        priority: "Normal",
-        due_date: "",
-        assigned_to: "",
-        notes: "",
-      });
-
+      setFormData(emptyForm);
       await fetchAuthorizations();
       await fetchDashboardData();
-
-      alert("Authorization added successfully!");
     } catch (error) {
       console.error("Add authorization error:", error);
       alert("Error adding authorization");
@@ -145,408 +154,313 @@ function Dashboard() {
       cpt_code: auth.cpt_code || "",
       status: auth.status || "Pending",
       priority: auth.priority || "Normal",
-      due_date: auth.due_date ? auth.due_date.slice(0, 10) : "",
+      due_date: formatDate(auth.due_date),
       assigned_to: auth.assigned_to || "",
       notes: auth.notes || "",
     });
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-    setEditForm({});
-  }
-
-  function handleEditChange(e) {
-    setEditForm({
-      ...editForm,
-      [e.target.name]: e.target.value,
-    });
-  }
-
   async function saveEdit(id) {
-  const token =
-    localStorage.getItem("authtrack_token") ||
-    localStorage.getItem("token");
-
-  try {
+    try {
       const response = await fetch(`${API_BASE}/authorizations/${id}`, {
         method: "PUT",
         headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
-},
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
         body: JSON.stringify(editForm),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update authorization");
-      }
-
-      await fetchAuthorizations();
-      await fetchDashboardData();
+      if (!response.ok) throw new Error("Failed to update authorization");
 
       setEditingId(null);
       setEditForm({});
+      await fetchAuthorizations();
+      await fetchDashboardData();
     } catch (error) {
       console.error("Edit save error:", error);
-      alert("There was an error saving the updated authorization.");
+      alert("Could not save edit.");
     }
   }
 
   async function deleteAuthorization(id) {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this authorization?"
-  );
+    if (!window.confirm("Delete this authorization?")) return;
 
-  if (!confirmed) return;
+    try {
+      const response = await fetch(`${API_BASE}/authorizations/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
 
- const token =
-   localStorage.getItem("authtrack_token") ||
-   localStorage.getItem("token");
+      if (!response.ok) throw new Error("Delete failed");
 
-  try {
-    const response = await fetch(`${API_BASE}/authorizations/${id}`, {
-  method: "DELETE",
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+      await fetchAuthorizations();
+      await fetchDashboardData();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Could not delete authorization.");
+    }
+  }
 
-    if (!response.ok) {
-      throw new Error("Delete failed");
+  function exportCsv() {
+    const headers = [
+      "patient_name",
+      "payer",
+      "procedure_name",
+      "cpt_code",
+      "status",
+      "priority",
+      "due_date",
+      "assigned_to",
+      "notes",
+    ];
+
+    const rows = authorizations.map((auth) =>
+      headers.map((h) => escapeCsv(h === "due_date" ? formatDate(auth[h]) : auth[h])).join(",")
+    );
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "authtrackpro-authorizations.csv";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  async function importCsv(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const rows = parseCsv(text);
+
+    if (!rows.length) {
+      alert("No rows found in CSV.");
+      return;
     }
 
-    await fetchAuthorizations();
-    await fetchDashboardData();
+    if (!window.confirm(`Import ${rows.length} authorization records?`)) return;
 
-  } catch (error) {
-    console.error("Delete error:", error);
-    alert("Could not delete authorization.");
+    try {
+      for (const row of rows) {
+        await fetch(`${API_BASE}/authorizations`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify(row),
+        });
+      }
+
+      await fetchAuthorizations();
+      await fetchDashboardData();
+      alert("CSV import complete.");
+    } catch (error) {
+      console.error("CSV import error:", error);
+      alert("CSV import failed.");
+    } finally {
+      e.target.value = "";
+    }
   }
-}
+
+  function logout() {
+    localStorage.removeItem("authtrack_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("authtrack_user");
+    navigate("/login");
+  }
+
+  const dueSoon = authorizations.filter((auth) => {
+    if (!auth.due_date) return false;
+    const today = new Date();
+    const due = new Date(auth.due_date);
+    const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    return diff >= 0 && diff <= 3;
+  }).length;
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">AuthTrack Pro Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-5 rounded-xl shadow">
-            <p>Total</p>
-            <h2 className="text-3xl font-bold">{metrics.total}</h2>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow">
-            <p>Pending</p>
-            <h2 className="text-3xl font-bold text-yellow-600">
-              {metrics.pending}
-            </h2>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow">
-            <p>Approved</p>
-            <h2 className="text-3xl font-bold text-green-600">
-              {metrics.approved}
-            </h2>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow">
-            <p>Denied</p>
-            <h2 className="text-3xl font-bold text-red-600">
-              {metrics.denied}
-            </h2>
-          </div>
+    <div style={styles.page}>
+      <header style={styles.header}>
+        <div>
+          <h1 style={styles.title}>AuthTrack Pro Dashboard</h1>
+          <p style={styles.subtitle}>Prior authorization command center</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Add New Authorization</h2>
+        <div style={styles.headerActions}>
+          <button style={styles.secondaryBtn} onClick={() => fileRef.current.click()}>
+            Import CSV
+          </button>
+          <button style={styles.secondaryBtn} onClick={exportCsv}>
+            Export CSV
+          </button>
+          <button style={styles.logoutBtn} onClick={logout}>
+            Logout
+          </button>
+          <input ref={fileRef} type="file" accept=".csv" onChange={importCsv} style={{ display: "none" }} />
+        </div>
+      </header>
 
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <input
-              type="text"
-              name="patient_name"
-              placeholder="Patient Name"
-              value={formData.patient_name}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-              required
-            />
+      <section style={styles.metrics}>
+        <Metric label="Total" value={metrics.total} />
+        <Metric label="Pending" value={metrics.pending} accent="#d97706" />
+        <Metric label="Approved" value={metrics.approved} accent="#16a34a" />
+        <Metric label="Denied" value={metrics.denied} accent="#dc2626" />
+        <Metric label="Due in 3 Days" value={dueSoon} accent="#2563eb" />
+      </section>
 
-            <input
-              type="text"
-              name="payer"
-              placeholder="Payer"
-              value={formData.payer}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-              required
-            />
+      <section style={styles.card}>
+        <h2 style={styles.cardTitle}>Add New Authorization</h2>
 
-            <input
-              type="text"
-              name="procedure_name"
-              placeholder="Procedure Name"
-              value={formData.procedure_name}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-              required
-            />
+        <form onSubmit={handleSubmit} style={styles.formGrid}>
+          <input name="patient_name" placeholder="Patient Name" value={formData.patient_name} onChange={handleChange} required />
+          <input name="payer" placeholder="Payer" value={formData.payer} onChange={handleChange} required />
+          <input name="procedure_name" placeholder="Procedure Name" value={formData.procedure_name} onChange={handleChange} required />
+          <input name="cpt_code" placeholder="CPT Code" value={formData.cpt_code} onChange={handleChange} required />
 
-            <input
-              type="text"
-              name="cpt_code"
-              placeholder="CPT Code"
-              value={formData.cpt_code}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-              required
-            />
+          <select name="status" value={formData.status} onChange={handleChange}>
+            {statusOptions.map((s) => <option key={s}>{s}</option>)}
+          </select>
 
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-            >
-              <option>Pending</option>
-              <option>Approved</option>
-              <option>Denied</option>
-              <option>Awaiting Clinical</option>
-              <option>Not Started</option>
-            </select>
+          <select name="priority" value={formData.priority} onChange={handleChange}>
+            {priorityOptions.map((p) => <option key={p}>{p}</option>)}
+          </select>
 
-            <select
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-            >
-              <option>Normal</option>
-              <option>High</option>
-            </select>
+          <input type="date" name="due_date" value={formData.due_date} onChange={handleChange} />
+          <input name="assigned_to" placeholder="Assigned To" value={formData.assigned_to} onChange={handleChange} />
+          <textarea name="notes" placeholder="Notes / payer follow-up / denial reason" value={formData.notes} onChange={handleChange} style={styles.notes} />
 
-            <input
-              type="date"
-              name="due_date"
-              value={formData.due_date}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-            />
+          <button type="submit" style={styles.primaryBtn}>Save Authorization</button>
+        </form>
+      </section>
 
-            <input
-              type="text"
-              name="assigned_to"
-              placeholder="Assigned To"
-              value={formData.assigned_to}
-              onChange={handleChange}
-              className="border p-3 rounded-lg"
-            />
-
-            <textarea
-              name="notes"
-              placeholder="Notes"
-              value={formData.notes}
-              onChange={handleChange}
-              className="border p-3 rounded-lg md:col-span-2"
-              rows="4"
-            />
-
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg md:col-span-2"
-            >
-              Save Authorization
-            </button>
-          </form>
+      <section style={styles.card}>
+        <div style={styles.tableHeader}>
+          <h2 style={styles.cardTitle}>Live Authorizations</h2>
+          <p style={styles.subtitle}>{authorizations.length} active records</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="p-5 border-b">
-            <h2 className="text-xl font-semibold">Live Authorizations</h2>
-          </div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div style={styles.tableWrap}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Payer</th>
+                  <th>Procedure</th>
+                  <th>CPT</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Due Date</th>
+                  <th>Assigned</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-          {loading ? (
-            <div className="p-6">Loading...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-100">
-                  <tr>
-                    <th className="p-3">Patient Name</th>
-                    <th className="p-3">Payer</th>
-                    <th className="p-3">Procedure</th>
-                    <th className="p-3">CPT</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Priority</th>
-                    <th className="p-3">Due Date</th>
-                    <th className="p-3">Assigned To</th>
-                    <th className="p-3">Notes</th>
-                    <th className="p-3">Actions</th>
+              <tbody>
+                {authorizations.map((auth) => (
+                  <tr key={auth.id}>
+                    {editingId === auth.id ? (
+                      <>
+                        <td><input name="patient_name" value={editForm.patient_name} onChange={handleEditChange} /></td>
+                        <td><input name="payer" value={editForm.payer} onChange={handleEditChange} /></td>
+                        <td><input name="procedure_name" value={editForm.procedure_name} onChange={handleEditChange} /></td>
+                        <td><input name="cpt_code" value={editForm.cpt_code} onChange={handleEditChange} /></td>
+                        <td><select name="status" value={editForm.status} onChange={handleEditChange}>{statusOptions.map((s) => <option key={s}>{s}</option>)}</select></td>
+                        <td><select name="priority" value={editForm.priority} onChange={handleEditChange}>{priorityOptions.map((p) => <option key={p}>{p}</option>)}</select></td>
+                        <td><input type="date" name="due_date" value={editForm.due_date} onChange={handleEditChange} /></td>
+                        <td><input name="assigned_to" value={editForm.assigned_to} onChange={handleEditChange} /></td>
+                        <td><input name="notes" value={editForm.notes} onChange={handleEditChange} /></td>
+                        <td>
+                          <button style={styles.saveBtn} onClick={() => saveEdit(auth.id)}>Save</button>
+                          <button style={styles.cancelBtn} onClick={() => setEditingId(null)}>Cancel</button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{auth.patient_name}</td>
+                        <td>{auth.payer}</td>
+                        <td>{auth.procedure_name}</td>
+                        <td>{auth.cpt_code}</td>
+                        <td><span style={statusStyle(auth.status)}>{auth.status}</span></td>
+                        <td>{auth.priority}</td>
+                        <td>{formatDate(auth.due_date)}</td>
+                        <td>{auth.assigned_to}</td>
+                        <td>{auth.notes}</td>
+                        <td>
+                          <button style={styles.editBtn} onClick={() => startEdit(auth)}>Edit</button>
+                          <button style={styles.deleteBtn} onClick={() => deleteAuthorization(auth.id)}>Delete</button>
+                        </td>
+                      </>
+                    )}
                   </tr>
-                </thead>
-
-                <tbody>
-                  {authorizations.map((auth) => (
-                    <tr key={auth.id} className="border-b">
-                      {editingId === auth.id ? (
-                        <>
-                          <td className="p-2">
-                            <input
-                              name="patient_name"
-                              value={editForm.patient_name || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              name="payer"
-                              value={editForm.payer || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              name="procedure_name"
-                              value={editForm.procedure_name || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              name="cpt_code"
-                              value={editForm.cpt_code || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <select
-                              name="status"
-                              value={editForm.status || "Pending"}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            >
-                              <option>Pending</option>
-                              <option>Approved</option>
-                              <option>Denied</option>
-                              <option>Awaiting Clinical</option>
-                              <option>Not Started</option>
-                            </select>
-                          </td>
-
-                          <td className="p-2">
-                            <select
-                              name="priority"
-                              value={editForm.priority || "Normal"}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            >
-                              <option>Normal</option>
-                              <option>High</option>
-                            </select>
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              type="date"
-                              name="due_date"
-                              value={editForm.due_date || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              name="assigned_to"
-                              value={editForm.assigned_to || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <input
-                              name="notes"
-                              value={editForm.notes || ""}
-                              onChange={handleEditChange}
-                              className="border p-1 rounded w-full"
-                            />
-                          </td>
-
-                          <td className="p-2">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => saveEdit(auth.id)}
-                                className="bg-green-600 text-white px-3 py-1 rounded"
-                              >
-                                Save
-                              </button>
-
-                              <button
-                                onClick={cancelEdit}
-                                className="bg-gray-500 text-white px-3 py-1 rounded"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="p-2">{auth.patient_name}</td>
-                          <td className="p-2">{auth.payer}</td>
-                          <td className="p-2">{auth.procedure_name}</td>
-                          <td className="p-2">{auth.cpt_code}</td>
-                          <td className="p-2">{auth.status}</td>
-                          <td className="p-2">{auth.priority}</td>
-                          <td className="p-2">
-                            {auth.due_date
-                              ? auth.due_date.slice(0, 10)
-                              : ""}
-                          </td>
-                          <td className="p-2">{auth.assigned_to}</td>
-                          <td className="p-2">{auth.notes}</td>
-
-                          <td className="p-2">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => startEdit(auth)}
-                                className="bg-blue-600 text-white px-3 py-1 rounded"
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                onClick={() => deleteAuthorization(auth.id)}
-                                className="bg-red-600 text-white px-3 py-1 rounded"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
 
-export default Dashboard;
+function Metric({ label, value, accent = "#0f172a" }) {
+  return (
+    <div style={styles.metricCard}>
+      <p style={styles.metricLabel}>{label}</p>
+      <h2 style={{ ...styles.metricValue, color: accent }}>{value}</h2>
+    </div>
+  );
+}
+
+function statusStyle(status) {
+  const color =
+    status === "Approved" ? "#16a34a" :
+    status === "Denied" ? "#dc2626" :
+    status === "Missing Docs" ? "#7c3aed" :
+    status === "Renewal Needed" ? "#2563eb" :
+    "#d97706";
+
+  return {
+    color,
+    background: `${color}18`,
+    border: `1px solid ${color}33`,
+    borderRadius: "999px",
+    padding: "6px 10px",
+    fontWeight: 800,
+    whiteSpace: "nowrap",
+  };
+}
+
+const styles = {
+  page: { minHeight: "100vh", background: "#f8fafc", padding: "32px", color: "#0f172a" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" },
+  title: { margin: 0, fontSize: "42px", fontWeight: 900 },
+  subtitle: { margin: "6px 0 0", color: "#64748b" },
+  headerActions: { display: "flex", gap: "12px", flexWrap: "wrap" },
+  metrics: { display: "grid", gridTemplateColumns: "repeat(5, minmax(150px, 1fr))", gap: "16px", marginBottom: "24px" },
+  metricCard: { background: "white", padding: "22px", borderRadius: "18px", boxShadow: "0 10px 30px rgba(15,23,42,.08)", border: "1px solid #e2e8f0" },
+  metricLabel: { margin: 0, color: "#64748b", fontWeight: 800 },
+  metricValue: { margin: "8px 0 0", fontSize: "36px" },
+  card: { background: "white", borderRadius: "22px", padding: "24px", boxShadow: "0 10px 30px rgba(15,23,42,.08)", border: "1px solid #e2e8f0", marginBottom: "24px" },
+  cardTitle: { margin: 0, fontSize: "24px", fontWeight: 900 },
+  formGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px", marginTop: "18px" },
+  notes: { gridColumn: "span 3", minHeight: "52px" },
+  primaryBtn: { background: "#2563eb", color: "white", border: 0, borderRadius: "12px", padding: "14px 18px", fontWeight: 900 },
+  secondaryBtn: { background: "white", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "12px 16px", fontWeight: 900 },
+  logoutBtn: { background: "#0f172a", color: "white", border: 0, borderRadius: "12px", padding: "12px 16px", fontWeight: 900 },
+  tableHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
+  tableWrap: { overflowX: "auto", border: "1px solid #e2e8f0", borderRadius: "16px" },
+  editBtn: { background: "#2563eb", color: "white", border: 0, borderRadius: "10px", padding: "8px 10px", marginRight: "6px" },
+  deleteBtn: { background: "#fee2e2", color: "#991b1b", border: 0, borderRadius: "10px", padding: "8px 10px" },
+  saveBtn: { background: "#16a34a", color: "white", border: 0, borderRadius: "10px", padding: "8px 10px", marginRight: "6px" },
+  cancelBtn: { background: "#64748b", color: "white", border: 0, borderRadius: "10px", padding: "8px 10px" },
+};
+EOF
