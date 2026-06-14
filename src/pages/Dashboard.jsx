@@ -232,41 +232,40 @@ export default function Dashboard() {
   }
 
   async function importCsv(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    const text = await file.text();
-    const rows = parseCsv(text);
+  if (!window.confirm("Import this CSV file into AuthTrack Pro?")) return;
 
-    if (!rows.length) {
-      alert("No rows found in CSV.");
-      return;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch(`${API_BASE}/authorizations/import`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "CSV import failed.");
     }
 
-    if (!window.confirm(`Import ${rows.length} authorization records?`)) return;
+    await fetchAuthorizations();
+    await fetchDashboardData();
 
-    try {
-      for (const row of rows) {
-        await fetch(`${API_BASE}/authorizations`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-          },
-          body: JSON.stringify(row),
-        });
-      }
-
-      await fetchAuthorizations();
-      await fetchDashboardData();
-      alert("CSV import complete.");
-    } catch (error) {
-      console.error("CSV import error:", error);
-      alert("CSV import failed.");
-    } finally {
-      e.target.value = "";
-    }
+    alert(`CSV import complete. ${data.importedCount} records added.`);
+  } catch (error) {
+    console.error("CSV import error:", error);
+    alert(error.message);
+  } finally {
+    e.target.value = "";
   }
+}
 
   function logout() {
     localStorage.removeItem("authtrack_token");
