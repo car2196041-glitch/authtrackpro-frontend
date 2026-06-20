@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -20,6 +21,46 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+    useEffect(() => {
+    const TIMEOUT = 15 * 60 * 1000;
+    const WARNING_TIME = 14 * 60 * 1000;
+
+    let logoutTimer;
+    let warningTimer;
+
+    const logout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("authtrack_token");
+      window.location.href = "/#/login";
+    };
+
+    const resetTimers = () => {
+      clearTimeout(logoutTimer);
+      clearTimeout(warningTimer);
+
+      warningTimer = setTimeout(() => {
+        alert("Your session will expire in 1 minute.");
+      }, WARNING_TIME);
+
+      logoutTimer = setTimeout(logout, TIMEOUT);
+    };
+
+    const events = ["mousemove", "keydown", "click", "scroll"];
+
+    events.forEach((event) => {
+      window.addEventListener(event, resetTimers);
+    });
+
+    resetTimers();
+
+    return () => {
+      clearTimeout(logoutTimer);
+      clearTimeout(warningTimer);
+      events.forEach((event) => {
+        window.removeEventListener(event, resetTimers);
+      });
+    };
+  }, []);
   return (
     <HashRouter>
       <Routes>
