@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/logo.jpeg";
 
 const API_BASE = "https://authtrackpro-backend.onrender.com";
 
