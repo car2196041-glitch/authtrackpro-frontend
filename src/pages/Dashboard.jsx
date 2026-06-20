@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.jpg";
 
 const API_BASE = "https://authtrackpro-backend.onrender.com";
 
@@ -308,7 +309,16 @@ export default function Dashboard() {
     <div style={styles.shell}>
       <aside style={styles.sidebar}>
         <div style={styles.logoBox}>
-          <div style={styles.logoIcon}>A</div>
+          <img
+  src="https://authtrackpro.com/favicon.ico"
+  alt="AuthTrack Pro"
+  style={{
+    width: "52px",
+    height: "52px",
+    objectFit: "contain",
+    borderRadius: "12px"
+  }}
+/>
           <div>
             <h2 style={styles.logoText}>AuthTrack Pro</h2>
             <p style={styles.logoSub}>Prior Auth Command Center</p>
