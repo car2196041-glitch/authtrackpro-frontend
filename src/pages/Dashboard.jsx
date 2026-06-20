@@ -310,13 +310,12 @@ export default function Dashboard() {
       <aside style={styles.sidebar}>
         <div style={styles.logoBox}>
           <img
-  src="https://authtrackpro.com/favicon.ico"
+  src={logo}
   alt="AuthTrack Pro"
   style={{
-    width: "52px",
-    height: "52px",
-    objectFit: "contain",
-    borderRadius: "12px"
+    width: "180px",
+    height: "90px",
+    objectFit: "contain"
   }}
 />
           <div>
