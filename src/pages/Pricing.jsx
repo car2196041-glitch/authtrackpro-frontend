@@ -1,318 +1,485 @@
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import Sidebar from "../components/Sidebar";
 
-export default function Pricing() {
-  const navigate = useNavigate();
+function Pricing() {
+  const [billingCycle, setBillingCycle] = useState("monthly");
+  const [facilityCount, setFacilityCount] = useState(1);
+  const [userCount, setUserCount] = useState(5);
+  const [storageNeeded, setStorageNeeded] = useState(10);
+  const [monthlyAuthorizations, setMonthlyAuthorizations] = useState(2500);
+  const [minutesSavedPerAuth, setMinutesSavedPerAuth] = useState(10);
+  const [hourlyLaborCost, setHourlyLaborCost] = useState(30);
+  const recommendedPlan =
+  facilityCount >= 10 ||
+  userCount >= 50 ||
+  storageNeeded >= 100 ||
+  monthlyAuthorizations >= 25000
+    ? "Enterprise"
+    : facilityCount >= 3 ||
+      userCount >= 15 ||
+      storageNeeded >= 50 ||
+      monthlyAuthorizations >= 7500
+    ? "Professional"
+    : "Starter";
+
+    const recommendedPrice =
+  recommendedPlan === "Enterprise"
+    ? "$4,500+/month"
+    : recommendedPlan === "Professional"
+    ? billingCycle === "annual"
+      ? "$5,092/year"
+      : "$499/month"
+    : billingCycle === "annual"
+    ? "$1,520/year"
+    : "$149/month";
+
+    const annualSavings =
+  recommendedPlan === "Professional"
+    ? "$896/year"
+    : recommendedPlan === "Starter"
+    ? "$268/year"
+    : "Custom savings";
+
+    const monthlyHoursSaved =
+  (monthlyAuthorizations * minutesSavedPerAuth) / 60;
+
+const monthlyLaborSavings =
+  monthlyHoursSaved * hourlyLaborCost;
+
+  const annualLaborSavings =
+  monthlyLaborSavings * 12;
+
+  const annualPlanCost =
+  recommendedPlan === "Enterprise"
+    ? 54000
+    : recommendedPlan === "Professional"
+    ? billingCycle === "annual"
+      ? 5092
+      : 5988
+    : billingCycle === "annual"
+    ? 1520
+    : 1788;
+
+    const estimatedAnnualROI =
+  annualLaborSavings - annualPlanCost;
+
+  const monthlyPlanCost = annualPlanCost / 12;
+
+const paybackPeriodMonths =
+  monthlyLaborSavings > 0
+    ? monthlyPlanCost / monthlyLaborSavings
+    : 0;
 
   const plans = [
-  {
-    name: "Clinic Starter",
-    price: "$149",
-    subtitle: "For small clinics starting prior auth tracking",
-    features: [
-      "Authorization tracking",
-      "CSV import and export",
-      "User dashboard",
-      "Due soon and overdue tracking",
-      "Denial and renewal tracking",
-      "Email support",
-    ],
-    button: "Start Starter",
-  },
-  {
-    name: "Professional",
-    price: "$349",
-    subtitle: "For growing teams needing manager visibility",
-    features: [
-      "Everything in Clinic Starter",
-      "Manager dashboard",
-      "Employee analytics",
-      "Live KPI reporting",
-      "Audit activity feed",
-      "Multi-user workflow tracking",
-      "Priority and status monitoring",
-    ],
-    button: "Start Professional",
-    featured: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    subtitle: "For multi-facility healthcare organizations",
-    features: [
-      "Everything in Professional",
-      "Multiple facility support",
-      "Advanced audit history",
-      "Enterprise reporting",
-      "Role-based access planning",
-      "Priority onboarding",
-      "Future EHR integration support",
-    ],
-    button: "Request Enterprise Demo",
-  },
-];
+    {
+      name: "Starter",
+      price: "$149",
+      annual: "$1520",
+      storage: "10 GB",
+      auths: "2,500/month",
+      users: "Up to 5 users",
+      features: [
+        "Authorization tracking",
+        "Standard dashboard",
+        "CSV export",
+        "Email support",
+      ],
+    },
+    {
+      name: "Professional",
+      featured: true,
+      price: "$349",
+      annual: "$3560",
+      storage: "50 GB",
+      auths: "15,000/month",
+      users: "Up to 25 users",
+      features: [
+        "Everything in Starter",
+        "Manager dashboard",
+        "Audit log",
+        "Priority support",
+      ],
+    },
+    {
+      name: "Business",
+      price: "$749",
+      annual: "$7640",
+      storage: "250 GB",
+      auths: "75,000/month",
+      users: "Up to 100 users",
+      features: [
+        "Everything in Professional",
+        "Advanced reporting",
+        "Multi-location support",
+        "Team productivity tracking",
+      ],
+    },
+    {
+      name: "Enterprise",
+      price: "Starting at $4,500",
+      annual: "Custom Contract",
+      storage: "1 TB+",
+      auths: "Unlimited",
+      users: "Unlimited users",
+      features: [
+        "Executive dashboard",
+        "API / EHR integration options",
+        "Dedicated implementation",
+        "Priority enterprise support",
+      ],
+    },
+  ];
 
   return (
-    <div style={styles.page}>
-      <nav style={styles.nav}>
-        <h2 style={styles.logo}>AuthTrack Pro</h2>
-        <div style={styles.navLinks}>
-          <button style={styles.link} onClick={() => navigate("/")}>Home</button>
-          <button style={styles.link} onClick={() => navigate("/login")}>Login</button>
-          <button style={styles.primarySmall} onClick={() => navigate("/register")}>Request Demo</button>
-        </div>
-      </nav>
+  <div style={{ display: "flex", minHeight: "100vh" }}>
+    <Sidebar />
 
-      <section style={styles.hero}>
-        <div style={styles.badge}>Simple pricing for healthcare teams</div>
-        <h1 style={styles.title}>Choose the plan that fits your authorization workflow.</h1>
-        <p style={styles.subtitle}>
-          From small ambulatory clinics to enterprise revenue cycle teams, AuthTrack Pro helps
-          organizations track prior authorizations, payer follow-up, denials, renewals, and manager visibility.
+    <div className="pricing-page" style={{ flex: 1 }}>
+      <section className="pricing-hero">
+        <h1>Simple, Scalable Pricing for Healthcare Authorization Teams</h1>
+        <p>
+          AuthTrack Pro pricing is based on the storage, authorization volume,
+          and features your organization needs — so your plan grows with your
+          team.
         </p>
       </section>
 
-      <section style={styles.pricingGrid}>
+      <section className="billing-toggle">
+
+  <button
+    className={billingCycle === "monthly" ? "active" : ""}
+    onClick={() => setBillingCycle("monthly")}
+  >
+    Monthly
+  </button>
+
+  <button
+    className={billingCycle === "annual" ? "active" : ""}
+    onClick={() => setBillingCycle("annual")}
+  >
+    Annual
+    <span className="save-badge">Save 15%</span>
+  </button>
+
+</section>
+
+      <section className="trial-box">
+        <h2>30-Day Free Trial</h2>
+        <p>
+          Includes up to <strong>500 authorizations</strong>,{" "}
+          <strong>2 GB storage</strong>, <strong>5 users</strong>, standard
+          dashboards, and email support.
+        </p>
+      </section>
+
+      <section className="pricing-grid">
         {plans.map((plan) => (
-          <div key={plan.name} style={plan.featured ? styles.featuredCard : styles.card}>
-            {plan.featured && <div style={styles.popular}>Most Popular</div>}
+          <div
+            className={`pricing-card ${plan.featured ? "featured" : ""}`}
+            key={plan.name}
+    >
+            <h2>{plan.name}</h2>
+            <p className="price">
+  {billingCycle === "monthly" ? plan.price : plan.annual}
+  {plan.name !== "Enterprise" && (
+    <span>{billingCycle === "monthly" ? "/month" : "/year"}</span>
+  )}
+</p>
 
-            <h2 style={styles.planName}>{plan.name}</h2>
-            <p style={styles.planSubtitle}>{plan.subtitle}</p>
-
-            <div style={styles.price}>
-              {plan.price}
-              {plan.price !== "Custom" && <span style={styles.month}>/month</span>}
+            <div className="plan-details">
+              <p><strong>Storage:</strong> {plan.storage}</p>
+              <p><strong>Authorizations:</strong> {plan.auths}</p>
+              <p><strong>Users:</strong> {plan.users}</p>
             </div>
 
-            <button
-              style={plan.featured ? styles.primaryButton : styles.secondaryButton}
-              onClick={() => navigate("/register")}
-            >
-              {plan.button}
-            </button>
-
-            <ul style={styles.featureList}>
+            <ul>
               {plan.features.map((feature) => (
-                <li key={feature} style={styles.featureItem}>✓ {feature}</li>
+                <li key={feature}>{feature}</li>
               ))}
             </ul>
+
+            <button className="pricing-button">
+              {plan.name === "Enterprise" ? "Request Quote" : "Start Trial"}
+            </button>
           </div>
         ))}
       </section>
 
-      <section style={styles.compare}>
-        <h2>Built for prior authorization teams ready to move beyond spreadsheets</h2>
-        <div style={styles.compareGrid}>
-          <div>CSV Import / Export</div>
-          <div>User Dashboard</div>
-          <div>Manager Dashboard</div>
-          <div>Employee Analytics</div>
-          <div>Audit Activity Feed</div>
-          <div>Due Soon / Overdue Tracking</div>
-        </div>
+      <section className="calculator-box">
+  <h2>Pricing Calculator</h2>
+
+  <p>
+    Estimate which plan is right for your organization based on your expected
+    usage.
+  </p>
+
+  <div className="calculator-grid">
+
+    <div className="calculator-item">
+      <label>Number of Facilities</label>
+      <input
+        type="number"
+        min="1"
+        value={facilityCount}
+        onChange={(e) => setFacilityCount(Number(e.target.value))}
+     />
+    </div>
+
+    <div className="calculator-item">
+      <label>Number of Users</label>
+      <input
+        type="number"
+        min="1"
+        value={userCount}
+        onChange={(e) => setUserCount(Number(e.target.value))}
+      />
+    </div>
+
+    <div className="calculator-item">
+      <label>Monthly Authorizations</label>
+      <input
+        type="number"
+        min="1"
+        value={monthlyAuthorizations}
+        onChange={(e) => setMonthlyAuthorizations(Number(e.target.value))}
+      />
+    </div>
+
+    <div className="calculator-item">
+      <label>Estimated Storage (GB)</label>
+      <input
+        type="number"
+        min="1"
+        value={storageNeeded}
+        onChange={(e) => setStorageNeeded(Number(e.target.value))}
+      />
+    </div>
+
+  </div>
+
+  <button className="pricing-button">
+    Calculate My Plan
+  </button>
+
+  <div className="calculator-result">
+  <h3>Recommended Plan</h3>
+  <p>
+    Based on your organization's projected usage, AuthTrack Pro recommends the{" "}
+    <strong>{recommendedPlan}</strong> plan to provide the best balance of performance, storage capacity, and scalability.
+  </p>
+
+  <p>
+  Estimated Cost: <strong>{recommendedPrice}</strong>
+</p>
+
+{billingCycle === "annual" && (
+  <p>
+    Annual Savings: <strong>{annualSavings}</strong>
+  </p>
+)}
+
+  <ul className="recommendation-details">
+  <li>Facilities: {facilityCount}</li>
+  <li>Users: {userCount}</li>
+  <li>Monthly Authorizations: {monthlyAuthorizations.toLocaleString()}</li>
+  <li>Estimated Storage: {storageNeeded} GB</li>
+</ul>
+
+</div>
+      </section>
+      <section className="comparison-box">
+        <h2>Feature Comparison</h2>
+  <p>
+    Compare AuthTrack Pro plans by features, usage limits, and support level.
+  </p>
+
+<table className="comparison-table">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Starter</th>
+      <th className="most-popular-column">
+        Professional ⭐
+      </th>
+      <th>Enterprise</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Authorization Tracking</td>
+      <td>Included</td>
+      <td>Included</td>
+      <td>Included</td>
+    </tr>
+    <tr>
+  <td>Users Included</td>
+  <td>Up to 5</td>
+  <td>Up to 25</td>
+  <td>Unlimited</td>
+</tr>
+<tr>
+  <td>Monthly Authorizations</td>
+  <td>2,500/month</td>
+  <td>10,000/month</td>
+  <td>Custom volume</td>
+</tr>
+<tr>
+  <td>Storage Included</td>
+  <td>10 GB</td>
+  <td>50 GB</td>
+  <td>1 TB+</td>
+</tr>
+<tr>
+  <td>CSV Import / Export</td>
+  <td>✓</td>
+  <td>✓</td>
+  <td>✓</td>
+</tr>
+
+<tr>
+  <td>Audit Log</td>
+  <td>—</td>
+  <td>✓</td>
+  <td>✓</td>
+</tr>
+
+<tr>
+  <td>Manager Dashboard</td>
+  <td>—</td>
+  <td>✓</td>
+  <td>✓</td>
+</tr>
+
+<tr>
+  <td>Executive Dashboard</td>
+  <td>—</td>
+  <td>—</td>
+  <td>✓</td>
+</tr>
+
+<tr>
+  <td>AI Insights</td>
+  <td>—</td>
+  <td>Coming Soon</td>
+  <td>Included</td>
+</tr>
+<tr>
+  <td>Support Level</td>
+  <td>Email Support</td>
+  <td>Priority Support</td>
+  <td>Dedicated Account Support</td>
+</tr>
+
+<tr>
+  <td>Implementation Support</td>
+  <td>Self-Guided</td>
+  <td>Guided Setup</td>
+  <td>Custom Implementation</td>
+</tr>
+
+<tr>
+  <td>BAA Available</td>
+  <td>—</td>
+  <td>✓</td>
+  <td>✓</td>
+</tr>
+  </tbody>
+</table>
+
+</section>
+
+<section className="roi-box">
+  <h2>ROI Calculator</h2>
+  <p>
+    Estimate how much time and cost AuthTrack Pro can help your organization save.
+  </p>
+
+  <div className="calculator-item">
+  <label>Average Authorizations Per Month</label>
+  <input
+    type="number"
+    min="0"
+    value={monthlyAuthorizations}
+    onChange={(e) => setMonthlyAuthorizations(Number(e.target.value))}
+  />
+</div>
+
+<div className="calculator-item">
+  <label>Minutes Saved Per Authorization</label>
+  <input
+    type="number" 
+    min="0"
+    value={minutesSavedPerAuth}
+    onChange={(e) => setMinutesSavedPerAuth(Number(e.target.value))}
+  />
+</div>
+
+<div className="calculator-item">
+  <label>Average Hourly Labor Cost</label>
+  <input
+    type="number"
+    min="0"
+    value={hourlyLaborCost}
+    onChange={(e) => setHourlyLaborCost(Number(e.target.value))}
+  />
+</div>
+
+<div className="calculator-result">
+  <h3>Estimated ROI</h3>
+  <p>
+    Monthly Hours Saved: <strong>{monthlyHoursSaved.toFixed(1)}</strong>
+  </p>
+  <p>
+    Estimated Monthly Labor Savings:{" "}
+    <strong>${monthlyLaborSavings.toLocaleString()}</strong>
+  </p>
+  <p>
+  Estimated Annual Labor Savings:{" "}
+  <strong>${annualLaborSavings.toLocaleString()}</strong>
+</p>
+
+<p>
+  Estimated Annual ROI After Plan Cost:{" "}
+  <strong>${estimatedAnnualROI.toLocaleString()}</strong>
+</p>
+
+<p>
+  Estimated Payback Period:{" "}
+  <strong>{paybackPeriodMonths.toFixed(1)} months</strong>
+</p>
+
+</div>
+
+<p className="roi-disclaimer">
+  *ROI estimates are based on the information entered and are provided for
+  planning purposes only. Actual savings may vary based on staffing,
+  workflows, payer requirements, and authorization volume.
+</p>
+
+</section>
+
+      <section className="usage-box">
+        <h2>Usage-Based Storage</h2>
+        <p>
+          Additional storage is available at <strong>$10 per 10 GB/month</strong>.
+          Enterprise archive storage and large data retention needs can be quoted
+          separately.
+        </p>
       </section>
 
-      <section style={styles.enterprise}>
-        <div>
-          <h2>Need enterprise pricing or EHR integration?</h2>
-          <p>
-           AuthTrack Pro supports ambulatory clinics, specialty practices,
-          imaging centers, skilled nursing facilities, and revenue cycle
-          organizations. Enterprise plans include manager analytics,
-          audit logging, multi-facility visibility, onboarding support,
-          and future EHR integration options.
+      <section className="enterprise-box">
+        <h2>Enterprise Organizations</h2>
+        <p>
+          For large healthcare groups, skilled nursing organizations, and
+          multi-location teams, enterprise pricing starts at{" "}
+          <strong>$4,500/month</strong> and includes 1 TB storage, unlimited
+          users, audit logs, executive dashboards, API access, and priority
+          support.
         </p>
-        </div>
-        <button style={styles.enterpriseButton} onClick={() => navigate("/register")}>
-          Request Enterprise Demo
-        </button>
       </section>
     </div>
+  </div>
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#f8fafc",
-    fontFamily: "Arial, sans-serif",
-    color: "#0f172a",
-  },
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "24px 56px",
-    background: "white",
-    boxShadow: "0 4px 20px rgba(15,23,42,0.06)",
-  },
-  logo: {
-    fontSize: "24px",
-    margin: 0,
-  },
-  navLinks: {
-    display: "flex",
-    gap: "14px",
-    alignItems: "center",
-  },
-  link: {
-    background: "transparent",
-    border: "none",
-    color: "#334155",
-    fontSize: "15px",
-    cursor: "pointer",
-    fontWeight: "700",
-  },
-  primarySmall: {
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    padding: "10px 16px",
-    borderRadius: "10px",
-    fontWeight: "700",
-    cursor: "pointer",
-  },
-  hero: {
-    textAlign: "center",
-    padding: "70px 56px 40px",
-  },
-  badge: {
-    display: "inline-block",
-    background: "#dbeafe",
-    color: "#1e40af",
-    padding: "10px 14px",
-    borderRadius: "999px",
-    fontWeight: "700",
-    marginBottom: "20px",
-  },
-  title: {
-    fontSize: "46px",
-    lineHeight: "1.08",
-    margin: "0 auto",
-    maxWidth: "900px",
-    letterSpacing: "-1px",
-  },
-  subtitle: {
-    fontSize: "18px",
-    color: "#475569",
-    lineHeight: "1.7",
-    margin: "20px auto 0",
-    maxWidth: "850px",
-  },
-  pricingGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "24px",
-    padding: "30px 56px 56px",
-  },
-  card: {
-    background: "white",
-    borderRadius: "22px",
-    padding: "30px",
-    boxShadow: "0 10px 25px rgba(15,23,42,0.08)",
-    border: "1px solid #e2e8f0",
-  },
-  featuredCard: {
-    background: "white",
-    borderRadius: "22px",
-    padding: "30px",
-    boxShadow: "0 25px 60px rgba(37,99,235,0.22)",
-    border: "2px solid #2563eb",
-    position: "relative",
-  },
-  popular: {
-    position: "absolute",
-    top: "-14px",
-    right: "24px",
-    background: "#2563eb",
-    color: "white",
-    padding: "8px 14px",
-    borderRadius: "999px",
-    fontWeight: "800",
-    fontSize: "13px",
-  },
-  planName: {
-    fontSize: "26px",
-    margin: 0,
-  },
-  planSubtitle: {
-    color: "#64748b",
-    minHeight: "48px",
-  },
-  price: {
-    fontSize: "42px",
-    fontWeight: "900",
-    margin: "24px 0",
-  },
-  month: {
-    fontSize: "16px",
-    color: "#64748b",
-    fontWeight: "700",
-  },
-  primaryButton: {
-    width: "100%",
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    padding: "14px",
-    borderRadius: "12px",
-    fontWeight: "800",
-    cursor: "pointer",
-    marginBottom: "22px",
-  },
-  secondaryButton: {
-    width: "100%",
-    background: "#0f172a",
-    color: "white",
-    border: "none",
-    padding: "14px",
-    borderRadius: "12px",
-    fontWeight: "800",
-    cursor: "pointer",
-    marginBottom: "22px",
-  },
-  featureList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-  },
-  featureItem: {
-    padding: "10px 0",
-    color: "#334155",
-    fontWeight: "600",
-  },
-  compare: {
-    margin: "0 56px 40px",
-    background: "white",
-    padding: "34px",
-    borderRadius: "22px",
-    boxShadow: "0 10px 25px rgba(15,23,42,0.08)",
-  },
-  compareGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "14px",
-    marginTop: "20px",
-  },
-  enterprise: {
-    margin: "20px 56px 70px",
-    background: "#0f172a",
-    color: "white",
-    padding: "42px",
-    borderRadius: "24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "28px",
-  },
-  enterpriseButton: {
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    padding: "14px 22px",
-    borderRadius: "12px",
-    fontWeight: "800",
-    cursor: "pointer",
-    fontSize: "15px",
-  },
-};
+export default Pricing;

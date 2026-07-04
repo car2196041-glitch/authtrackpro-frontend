@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../index.css";
+import Sidebar from "../components/Sidebar";
 
 export default function ManagerDashboard() {
   const [statusFilter, setStatusFilter] = useState("All");
@@ -14,7 +15,7 @@ useEffect(() => {
       const token = localStorage.getItem("authtrack_token") || localStorage.getItem("token");
 
       const response = await fetch(
-        "https://authtrackpro-backend.onrender.com/authorizations",
+        "http://localhost:3000/authorizations",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -23,7 +24,7 @@ useEffect(() => {
       );
 
       const auditResponse = await fetch(
-  "https://authtrackpro-backend.onrender.com/audit-logs",
+  "http://localhost:3000/audit-logs",
   {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -132,7 +133,10 @@ const employees = [
 ];
 
   return (
-    <div className="manager-page">
+  <div style={{ display: "flex", minHeight: "100vh" }}>
+    <Sidebar />
+
+    <div className="manager-page" style={{ flex: 1 }}>
       <div className="manager-header">
         <div>
           <p className="manager-eyebrow">Enterprise Operations</p>
@@ -373,5 +377,6 @@ const employees = [
         </div>
       </div>
     </div>
+</div>
   );
 }

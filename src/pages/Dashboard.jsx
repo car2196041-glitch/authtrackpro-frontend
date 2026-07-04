@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg";
+import Sidebar from "../components/Sidebar";
+import {
+  Home,
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  Info,
+  LogOut,
+} from "lucide-react";
 
-const API_BASE = "https://authtrackpro-backend.onrender.com";
+const API_BASE = "http://localhost:3000";
 
 const emptyForm = {
   patient_name: "",
@@ -307,50 +316,7 @@ export default function Dashboard() {
 
   return (
     <div style={styles.shell}>
-      <aside style={styles.sidebar}>
-        <div style={styles.logoBox}>
-          <img
-  src={logo}
-  alt="AuthTrack Pro"
-  style={{
-    width: "180px",
-    height: "90px",
-    objectFit: "contain"
-  }}
-/>
-          <div>
-            <h2 style={styles.logoText}>AuthTrack Pro</h2>
-            <p style={styles.logoSub}>Prior Auth Command Center</p>
-          </div>
-        </div>
-
-        <nav style={styles.nav}>
-  <button style={styles.navActive} onClick={() => navigate("/dashboard")}>
-    Dashboard
-  </button>
-
-  <button style={styles.navItem} onClick={() => navigate("/manager-dashboard")}>
-    Manager Dashboard
-  </button>
-
-  <button style={styles.navItem} onClick={() => navigate("/")}>
-    Home
-  </button>
-
-  <button style={styles.navItem} onClick={() => navigate("/pricing")}>
-    Pricing
-  </button>
-
-  <button style={styles.navItem} onClick={logout}>
-    Logout
-  </button>
-</nav>
-
-        <div style={styles.sidebarFooter}>
-          <p style={styles.sidebarSmall}>Pilot Mode</p>
-          <strong>Reliant / Med-Metrix Ready</strong>
-        </div>
-      </aside>
+      <Sidebar />
 
       <main style={styles.main}>
         <header style={styles.topBar}>
@@ -584,7 +550,9 @@ const styles = {
   },
   sidebar: {
     width: "280px",
-    background: "#0f172a",
+    background: "linear-gradient(180deg, #0b1120 0%, #111827 100%)",
+    boxShadow: "4px 0 24px rgba(2, 6, 23, 0.35)",
+    borderRight: "1px solid rgba(255,255,255,0.06)",
     color: "white",
     padding: "28px",
     display: "flex",
@@ -604,6 +572,13 @@ const styles = {
   logoText: { margin: 0, fontSize: "22px" },
   logoSub: { margin: "4px 0 0", color: "#cbd5e1", fontSize: "13px" },
   nav: { display: "grid", gap: "10px", marginTop: "42px" },
+  navSectionLabel: {
+  margin: "0 0 8px 4px",
+  color: "#94a3b8",
+  fontSize: "12px",
+  fontWeight: "800",
+  letterSpacing: "1.4px",
+},
   navActive: {
   width: "100%",
   padding: "12px 14px",
@@ -615,6 +590,8 @@ const styles = {
   fontSize: "15px",
   fontWeight: "700",
   cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
 },
   navItem: {
   width: "100%",
@@ -627,6 +604,8 @@ const styles = {
   fontSize: "15px",
   fontWeight: "600",
   cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
 },
   sidebarFooter: {
     background: "rgba(255,255,255,.08)",

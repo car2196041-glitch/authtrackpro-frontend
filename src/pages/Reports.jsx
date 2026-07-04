@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 function Reports() {
   const navigate = useNavigate();
@@ -11,18 +12,7 @@ function Reports() {
 
   return (
     <div style={styles.page}>
-      <aside style={styles.sidebar}>
-        <h2 style={styles.logo}>AuthTrack Pro</h2>
-
-        <button style={styles.navButton} onClick={() => navigate("/dashboard")}>Dashboard</button>
-        <button style={styles.navButton} onClick={() => navigate("/manager-dashboard")}>Manager Dashboard</button>
-        <button style={styles.navButton} onClick={() => navigate("/authorizations")}>Authorizations</button>
-        <button style={styles.navButton} onClick={() => navigate("/audit-log")}>Audit Log</button>
-        <button style={styles.activeButton} onClick={() => navigate("/reports")}>Reports</button>
-        <button style={styles.navButton} onClick={() => navigate("/pricing")}>Pricing</button>
-        <button style={styles.navButton} onClick={() => navigate("/")}>Home</button>
-        <button style={styles.logoutButton} onClick={logout}>Logout</button>
-      </aside>
+      <Sidebar />
 
       <main style={styles.main}>
         <h1 style={styles.title}>Reports & Analytics</h1>

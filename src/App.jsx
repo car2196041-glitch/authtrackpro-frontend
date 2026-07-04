@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
@@ -9,6 +10,7 @@ import Pricing from "./pages/Pricing";
 import AuditLog from "./pages/AuditLog";  
 import Reports from "./pages/Reports";
 import Authorizations from "./pages/Authorizations";
+import About from "./pages/About";
 
 function ProtectedRoute({ children }) {
   const token =
@@ -69,6 +71,7 @@ export default function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/about" element={<About />} />
         <Route
   path="/dashboard"
   element={
