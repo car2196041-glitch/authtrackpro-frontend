@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../api/api";
 import {
   Home,
   LayoutDashboard,
@@ -10,8 +11,6 @@ import {
   Info,
   LogOut,
 } from "lucide-react";
-
-const API_BASE = "http://localhost:3000";
 
 const emptyForm = {
   patient_name: "",

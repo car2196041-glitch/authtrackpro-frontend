@@ -14,8 +14,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("authtrack_token") || localStorage.getItem("token");
 
-      const response = await fetch(
-        "http://localhost:3000/authorizations",
+      const response = await fetch(`${API_BASE}/authorizations`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -23,8 +22,7 @@ useEffect(() => {
         }
       );
 
-      const auditResponse = await fetch(
-  "http://localhost:3000/audit-logs",
+      const auditResponse = await fetch(`${API_BASE}/audit-logs`,
   {
     headers: {
       Authorization: `Bearer ${token}`,

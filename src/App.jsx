@@ -11,6 +11,7 @@ import AuditLog from "./pages/AuditLog";
 import Reports from "./pages/Reports";
 import Authorizations from "./pages/Authorizations";
 import About from "./pages/About";
+import SessionTimeout from "./components/SessionTimeout";
 
 function ProtectedRoute({ children }) {
   const token =
@@ -65,6 +66,7 @@ export default function App() {
   }, []);
   return (
     <HashRouter>
+      <SessionTimeout />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
