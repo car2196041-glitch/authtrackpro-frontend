@@ -12,6 +12,7 @@ import Reports from "./pages/Reports";
 import Authorizations from "./pages/Authorizations";
 import About from "./pages/About";
 import SessionTimeout from "./components/SessionTimeout";
+import DemoRequest from "./pages/DemoRequest";
 
 function ProtectedRoute({ children }) {
   const token =
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
+        <Route path="/request-demo" element={<DemoRequest />} />
         <Route
   path="/dashboard"
   element={
