@@ -338,7 +338,9 @@ const denialRate =
         <td>{denialRate}%</td>
 
         <td>
-          {completionRate >= 85
+          {employee.assigned === 0
+            ? "⚪ No Assignments"
+            : completionRate >= 85
             ? "🟢 On Target"
             : "🟡 Needs Review"}
         </td>
