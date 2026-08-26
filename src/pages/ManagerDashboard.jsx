@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../index.css";
 import Sidebar from "../components/Sidebar";
-import API_BASE from "../api";
+import API_BASE from "../api/api";
 
 export default function ManagerDashboard() {
   const [statusFilter, setStatusFilter] = useState("All");
