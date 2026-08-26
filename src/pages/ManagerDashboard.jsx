@@ -9,6 +9,7 @@ export default function ManagerDashboard() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [authorizations, setAuthorizations] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
 useEffect(() => {
   async function loadAuthorizations() {
@@ -44,6 +45,59 @@ if (Array.isArray(data)) {
 } else {
   setAuthorizations([]);
 }
+if (Array.isArray(data)) {
+  const usersResponse = await fetch(`${API_BASE}/organization/users`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!usersResponse.ok) {
+    throw new Error("Failed to load organization users");
+  }
+
+  const users = await usersResponse.json();
+
+  const employeeData = users
+    .filter((user) => user.active !== false)
+    .map((user) => {
+      const userAuthorizations = data.filter(
+        (auth) => Number(auth.user_id) === Number(user.id)
+      );
+
+      const approved = userAuthorizations.filter(
+        (auth) => auth.status === "Approved"
+      ).length;
+
+      const denied = userAuthorizations.filter(
+        (auth) => auth.status === "Denied"
+      ).length;
+
+      const pending = userAuthorizations.filter(
+        (auth) =>
+          auth.status !== "Approved" &&
+          auth.status !== "Denied"
+      ).length;
+
+      const fullName = [user.first_name, user.last_name]
+        .filter(Boolean)
+        .join(" ");
+
+      return {
+        id: user.id,
+        name: fullName || user.email,
+        email: user.email,
+        role: user.role,
+        assigned: userAuthorizations.length,
+        completed: approved,
+        pending,
+        denied,
+      };
+    });
+
+  setEmployees(employeeData);
+}
+
     } catch (error) {
       console.error("Error loading manager authorizations:", error);
     }
@@ -95,41 +149,6 @@ if (Array.isArray(data)) {
     : "0%",
     avgTurnaround: "2.4 days",
   };
-
-const employees = [
-  {
-    name: "Sarah Martinez",
-    role: "Authorization Specialist",
-    assigned: 35,
-    completed: 28,
-    pending: 7,
-    denied: 3,
-  },
-  {
-    name: "John Lee",
-    role: "Senior Auth Specialist",
-    assigned: 42,
-    completed: 36,
-    pending: 6,
-    denied: 2,
-  },
-  {
-    name: "Emily Carter",
-    role: "Authorization Coordinator",
-    assigned: 31,
-    completed: 24,
-    pending: 7,
-    denied: 4,
-  },
-  {
-    name: "Michael Brown",
-    role: "Authorization Specialist",
-    assigned: 40,
-    completed: 35,
-    pending: 5,
-    denied: 2,
-  },
-];
 
   return (
   <div style={{ display: "flex", minHeight: "100vh" }}>
