@@ -305,13 +305,15 @@ if (Array.isArray(data)) {
 
     <tbody>
   {employees.map((employee) => {
-    const completionRate = Math.round(
-      (employee.completed / employee.assigned) * 100
-    );
+    const completionRate =
+  employee.assigned > 0
+    ? Math.round((employee.completed / employee.assigned) * 100)
+    : 0;
 
-    const denialRate = Math.round(
-      (employee.denied / employee.assigned) * 100
-    );
+const denialRate =
+  employee.assigned > 0
+    ? Math.round((employee.denied / employee.assigned) * 100)
+    : 0;
 
     return (
       <tr
